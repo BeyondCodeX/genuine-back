@@ -22,12 +22,12 @@ Route::post('/dialogflow-webhook', function (Request $request) {
     $parameters = $request->input('queryResult.parameters');
 
     // Suponiendo que tienes una API que devuelve la cantidad de productos
-    $producto = $parameters['producto'] ?? 'general';
-    $apiResponse = Http::get("https://tudominio.com/api/stock", ['producto' => $producto]);
+    $category = $parameters['category'] ?? 'general';
+    $apiResponse = Http::get("https://f8e3-52-23-198-223.ngrok-free.app/category/{$category}/products/count", ['category' => $category]);
 
-    $cantidad = $apiResponse->json()['cantidad'] ?? 'desconocida';
+    $quantity = $apiResponse->json()['total_products'] ?? 'desconocida';
 
     return response()->json([
-        "fulfillmentText" => "Actualmente tenemos $cantidad unidades de $producto disponibles."
+        "fulfillmentText" => "There are left $quantity units of $category available."
     ]);
 });
