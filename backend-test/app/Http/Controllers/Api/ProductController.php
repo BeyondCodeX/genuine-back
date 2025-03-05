@@ -50,4 +50,6 @@ class ProductController extends Controller
         $count = Product::where('category_id', $id)->sum('quantity');
         return response()->json(['category_id' => $id, 'total_products' => $count], 200);
     }
+
+   
 }
