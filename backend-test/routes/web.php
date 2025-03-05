@@ -3,9 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\DialogflowController; // <-- Importar el controlador
-
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,8 +15,19 @@ Route::apiResource('categories', CategoryController::class);
 Route::apiResource('products', ProductController::class);
 
 // Endpoint específico para consultar la cantidad de productos por categoría
-Route::get('/category/{id}/products/count', [ProductController::class, 'countByCategory']);
 
-// Ruta para Dialogflow
-Route::post('/dialogflow', [DialogflowController::class, 'detectIntent']); 
 
+Route::post('/dialogflow-webhook', function (Request $request) {
+    $queryText = $request->input('queryResult.queryText');
+    $parameters = $request->input('queryResult.parameters');
+
+    // Suponiendo que tienes una API que devuelve la cantidad de productos
+    $producto = $parameters['producto'] ?? 'general';
+    $apiResponse = Http::get("https://tudominio.com/api/stock", ['producto' => $producto]);
+
+    $cantidad = $apiResponse->json()['cantidad'] ?? 'desconocida';
+
+    return response()->json([
+        "fulfillmentText" => "Actualmente tenemos $cantidad unidades de $producto disponibles."
+    ]);
+});
